@@ -102,7 +102,7 @@ def potential_field_planning(sx, sy, gx, gy, ox, oy, reso, rr):
     pmap, minx, miny = calc_potential_field(gx, gy, ox, oy, reso, rr)
 
     # search path
-    d = np.hypot(sx - gx, sy - gy)
+    d = np.hypot(sx - gx, sy - gy) #distanza fra punti
     ix = round((sx - minx) / reso)
     iy = round((sy - miny) / reso)
     gix = round((gx - minx) / reso)
@@ -113,12 +113,12 @@ def potential_field_planning(sx, sy, gx, gy, ox, oy, reso, rr):
         plt.plot(ix, iy, "*k")
         plt.plot(gix, giy, "*m")
 
-    rx, ry = [sx], [sy]
+    rx, ry = [sx], [sy]  #li fa diventare liste
     motion = get_motion_model()
     while d >= reso:
         minp = float("inf")
-        minix, miniy = -1, -1
-        for i, _ in enumerate(motion):
+        minix, miniy = -1, -1 #valori a caso
+        for i, _ in enumerate(motion):  #serve a dare un numero alle direzioni
             inx = int(ix + motion[i][0])
             iny = int(iy + motion[i][1])
             if inx >= len(pmap) or iny >= len(pmap[0]):
