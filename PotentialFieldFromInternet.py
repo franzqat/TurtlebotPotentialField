@@ -28,18 +28,22 @@ show_animation = True
 
 
 def calc_potential_field(gx, gy, ox, oy, reso, rr):
+    
+    #è una cacata. calcola il campo di potenziale di tutto il sistema secondo queste formule qua sotto
+    #da sistemare
+    #dando dei valori a minx,y, maxx,y definiamo le dimensioni dell'ambiente
     minx = min(ox) - AREA_WIDTH / 2.0
     miny = min(oy) - AREA_WIDTH / 2.0
     maxx = max(ox) + AREA_WIDTH / 2.0
     maxy = max(oy) + AREA_WIDTH / 2.0
-    xw = int(round((maxx - minx) / reso))
-    yw = int(round((maxy - miny) / reso))
+    xw = int(round((maxx - minx) / reso)) #larghezza
+    yw = int(round((maxy - miny) / reso)) #altezza dell'ambiente
 
     # calc each potential
-    pmap = [[0.0 for i in range(yw)] for i in range(xw)]
+    pmap = [[0.0 for i in range(yw)] for i in range(xw)] #tutti i potenziali a 0
 
     for ix in range(xw):
-        x = ix * reso + minx
+        x = ix * reso + minx 
 
         for iy in range(yw):
             y = iy * reso + miny
@@ -90,7 +94,8 @@ def get_motion_model():
 
     return motion
 
-
+#reso == grid_size
+#rr == robot_radius
 def potential_field_planning(sx, sy, gx, gy, ox, oy, reso, rr):
 
     # calc potential field
@@ -149,12 +154,12 @@ def draw_heatmap(data):
 def main():
     print("potential_field_planning start")
 
-    sx = 0.0  # start x position [m]
+    sx = 10.0  # start x position [m]
     sy = 10.0  # start y positon [m]
     gx = 30.0  # goal x position [m]
     gy = 30.0  # goal y position [m]
-    grid_size = 0.5  # potential grid size [m]
-    robot_radius = 5.0  # robot radius [m]
+    grid_size = 1  # potential grid size [m]
+    robot_radius = 1.0  # robot radius [m]
 
     ox = [15.0, 5.0, 20.0, 25.0, 13.5, 28.0, 27.0]  # obstacle x position list [m]
     oy = [25.0, 15.0, 26.0, 25.0, 22.0, 28.0, 28.0]  # obstacle y position list [m]
