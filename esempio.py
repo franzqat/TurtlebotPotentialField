@@ -6,6 +6,8 @@ Created on Wed May 22 12:20:02 2019
 """
 import pylab
 import math
+import numpy as np
+import matplotlib.pyplot as plt
 
 class PISat:
 
@@ -175,6 +177,7 @@ class PotentialFieldControl:
         return (vl, vr)
 
 
+
 delta_t = 0.001
 robot = Robot(6.0, 25.0, 0.3)
 
@@ -187,7 +190,7 @@ vl_array = [ ]
 vr_array = [ ]
 
 ostacoli=[(10,10),(25,20), (30,30),(40,40)]
-p = PotentialFieldControl(robot,1, 1.5,5, 4, 10, ostacoli, k_att=1, k_rep=10)
+p = PotentialFieldControl(robot,1, 1.5,5, 4, 30, ostacoli, k_att=1, k_rep=10)
 
 
 
@@ -254,15 +257,23 @@ while t < 60:
     t = t + delta_t
 """
 
-pylab.figure(1)
-pylab.plot(x_array, y_array, 'r-+', label='posizione robot')
+
+
+
+
+fig, ax = pylab.subplots()
 for (x,y) in ostacoli:
-    pylab.plot(x, y, 'b-+')
-pylab.legend()
+    print(x, y)
+    cicle=plt.Circle((x,y), 2, color='b')
+    plt.gcf().gca().add_artist(cicle)
+plt.axis([0, 60, 0, 60])
+plt.plot(x_array, y_array, 'r-+', label='posizione robot')
+plt.legend() 
+plt.show()
+
 
 #pylab.figure(2)
 #pylab.plot(time_array, vl_array, 'r-+', label='vl')
 #pylab.plot(time_array, vr_array, 'b-+', label='vr')
 #pylab.legend()
 
-pylab.show()
