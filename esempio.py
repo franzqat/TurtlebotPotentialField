@@ -9,6 +9,9 @@ import math
 import numpy as np
 import matplotlib.pyplot as plt
 
+import distance_control
+import turtle
+
 class PISat:
 
     def __init__(self, kp, ki, sat):
@@ -210,7 +213,7 @@ def forza_repulsiva(ostacolo, posizione, soglia):
 
 
 
-delta_t = 0.001
+delta_t = 0.01
 
 distanza_ruote=0.3
 robot = Robot(6.0, 25.0, distanza_ruote)
@@ -222,7 +225,7 @@ theta = [ ]
 vl_array = [ ]
 vr_array = [ ]
 
-ostacoli=[Ostacolo((10,10), 2, 20),
+ostacoli=[Ostacolo((10,10), 2, 10),
           Ostacolo((10,30), 2, 20),
           Ostacolo((15,20), 3, 20),
           Ostacolo((20,10), 1, 20),          
@@ -255,6 +258,7 @@ while t < 60:
 
 raggio_robot=distanza_ruote/2+0.1
 fig, ax = pylab.subplots()
+
 for ostacolo in ostacoli:
     cicle=plt.Circle(ostacolo.centro, ostacolo.raggio, color='b')
     plt.gcf().gca().add_artist(cicle)
