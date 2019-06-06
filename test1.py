@@ -5,7 +5,6 @@ Created on Thu Jun  6 17:52:12 2019
 @author: simon
 """
 
-import pylab
 import math
 import numpy as np
 import matplotlib
@@ -170,16 +169,15 @@ class PotentialFieldControl:
         return (vl, vr)
 
 
-k_repulsiva = 0.5
+k_repulsiva = 0.1
 ostacoli=[Ostacolo((1.5,1.0), 0.2, k_repulsiva),
-          Ostacolo((2.8,1.0), 0.2, k_repulsiva),
-          Ostacolo((2.0,0.8), 0.2, k_repulsiva)]
+          Ostacolo((2.4,0.7), 0.2, k_repulsiva)]
 START=(0.105,0.105)
 TARGET=(2.8, 1.8)
 robot = rb.Robot(1.0, 5.0, whelebase)
 robot.setPose(START[0], START[1], 0)
 
-p = PotentialFieldControl(robot,1, 0.22,5, 2.84, soglia=0.1, ostacoli=ostacoli, k_att=1)
+p = PotentialFieldControl(robot,1, 0.22,5, 2.84, soglia=0.2, ostacoli=ostacoli, k_att=1)
 
 t = 0
 time_array = [ ]
