@@ -3,17 +3,28 @@
 #
 import sys
 from turtle import *
-from distance_control import *
+from PotentialField_control import *
 
 if __name__ == "__main__":
 
     t = Turtlebot()
     t.open()
 
-    d = DistanceController(t,
-                           0.005, # 5ms
-                           5,   # kp
-                           200)  # saturation
+    d = PotentialFieldControl(t,
+                              1, #bot
+                              0.22, ##base
+                              5,  #altezza
+                              2.84, #deltat
+                              ,# kp_lin
+                              , #sat_lineare
+                              ,#kp ang
+                              ,#sat angolare
+                              
+                              
+                              soglia=0.26,#soglia
+                              ostacoli=ostacoli, #ostacoli
+                              k_att=1)#katt)
+    
     d.start()
 
     while True:
