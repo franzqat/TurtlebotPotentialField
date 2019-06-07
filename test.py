@@ -9,21 +9,18 @@ if __name__ == "__main__":
 
     t = Turtlebot()
     t.open()
-
-    d = PotentialFieldControl(t,
-                              1, #bot
-                              0.22, ##base
-                              5,  #altezza
-                              2.84, #deltat
-                              ,# kp_lin
-                              , #sat_lineare
-                              ,#kp ang
-                              ,#sat angolare
-                              
-                              
+self, robot, kp_lin, sat_lin, kp_angular, sat_angular, soglia, ostacoli, k_att):
+    d = PotentialFieldControl(t, #bot
+                              3, ##base
+                              2,  #altezza
+                              0.01, #deltat
+                              1,# kp_lin
+                              0.22, #sat_lineare
+                              5,#kp ang
+                              2.84,#sat angolare                        
                               soglia=0.26,#soglia
                               ostacoli=ostacoli, #ostacoli
-                              k_att=1)#katt)
+                              k_att=1)#katt
     
     d.start()
 
