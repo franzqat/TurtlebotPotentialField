@@ -17,6 +17,14 @@ vel_max=0.22 #m/s
 rot_max=2.84 #rad/s
 whelebase=0.160 #m
 robot_radius=0.105 #m
+#Parametri terreno
+base=3
+altezza=2
+k_rep_bordi=0.5
+k_repulsiva_ostacoli = 0.5
+
+
+dati=[]
 
 
 class Ostacolo:
@@ -58,15 +66,15 @@ def forza_repulsiva_ostacolo(ostacolo, posizione, soglia):
         if angolo > abs(math.pi/2):
             f_rep_x=-f_rep*math.cos(angolo)
         else:
-            f_rep_x=+f_rep*math.cos(angolo)
+            f_rep_x=f_rep*math.cos(angolo)
             
         if angolo > 0:
             f_rep_y=-f_rep*math.sin(angolo)
         else:
             f_rep_y=f_rep*math.sin(angolo)
             
-#        f_rep_x=-f_rep*math.cos(angolo)
-#        f_rep_y=+f_rep*math.sin(angolo)
+        #f_rep_x=f_rep*math.cos(angolo)
+        #f_rep_y=f_rep*math.sin(angolo)
         #print(f"angolo {angolo} repx {f_rep_x}, repy {f_rep_y}, t {t} ,d {d}")
     else:
         f_rep_x=0
@@ -75,10 +83,10 @@ def forza_repulsiva_ostacolo(ostacolo, posizione, soglia):
     return f_rep_x, f_rep_y
 
 
-def forza_repulsiva_bordo_x(posizione, soglia):
+def forza_repulsiva_bordo_x(posizione, base, altezza, k_rep_b, soglia):
     f_rep_x=0
     f_rep_y=0
-    k_rep=0.5
+    k_rep=k_rep_b
     #distanza lato inferiore
     d0=posizione[1]
     if d0<soglia:
@@ -86,7 +94,7 @@ def forza_repulsiva_bordo_x(posizione, soglia):
         f_rep_y=+f_rep
     
     #distanza lato superiore
-    d0=2-posizione[1]
+    d0=altezza-posizione[1]
     if d0<soglia:
         f_rep=k_rep*((1/d0**3)-(1/((d0**2)*soglia)))
         f_rep_y=-f_rep
@@ -98,7 +106,7 @@ def forza_repulsiva_bordo_x(posizione, soglia):
         f_rep_x=+f_rep
     
     #distanza lato destro
-    d0=3-posizione[0]
+    d0=base-posizione[0]
     if d0<soglia:
         f_rep=k_rep*((1/d0**3)-(1/((d0**2)*soglia)))
         f_rep_x=-f_rep
@@ -115,10 +123,15 @@ class PotentialFieldControl:
         self.robot = robot
         self.soglia=soglia
         self.ostacoli=ostacoli
-        self.k_att=k_att       
-
+        self.k_att=k_att
+        self.i=0
+        
     def evaluate(self, target_x, target_y):
-
+        
+        dato=[]
+        dati.append(dato)
+        dati[self.i].append((robot.x, robot.y))
+        
         f_tot_x=0
         f_tot_y=0
         
@@ -126,12 +139,18 @@ class PotentialFieldControl:
         for ostacolo in self.ostacoli:            
             f_rep_x, f_rep_y=forza_repulsiva_ostacolo(ostacolo=ostacolo, 
                                              posizione=(self.robot.x, self.robot.y),
-                                             soglia=self.soglia)           
+                                             soglia=self.soglia)
+            dati[self.i].append((f_rep_x, f_rep_y))
             f_tot_x+=f_rep_x
             f_tot_y+=f_rep_y
             
         f_rep_x, f_rep_y = forza_repulsiva_bordo_x(posizione=(self.robot.x, self.robot.y),
-                                             soglia=self.soglia)
+                                                   base=base,
+                                                   altezza=altezza,
+                                                   k_rep_b=k_rep_bordi,
+                                                   soglia=self.soglia)
+        
+        dati[self.i].append((f_rep_x, f_rep_y))
         f_tot_x+=f_rep_x
         f_tot_y+=f_rep_y
         #forza attrattiva
@@ -139,6 +158,7 @@ class PotentialFieldControl:
                                           posizione=(self.robot.x, self.robot.y), 
                                           target=(target_x, target_y))
         
+        dati[self.i].append((f_att_x, f_att_y))
         #print(f_att_x,f_att_y,)
         f_tot_x+=f_att_x
         f_tot_y+=f_att_y
@@ -166,12 +186,19 @@ class PotentialFieldControl:
 
         vl = v - (w * self.robot.wheelbase / 2)
         vr = v + (w * self.robot.wheelbase / 2)
+        
+        dati[self.i].append((v, w))
+        dati[self.i].append((vl, vr))
+        self.i+=1
+        
         return (vl, vr)
 
 
-k_repulsiva = 0.1
-ostacoli=[Ostacolo((1.5,1.0), 0.2, k_repulsiva),
-          Ostacolo((2.4,0.7), 0.2, k_repulsiva)]
+
+ostacoli=[Ostacolo((1.5,1.0), 0.2, k_repulsiva_ostacoli),
+          Ostacolo((2.1,1.8), 0.2, k_repulsiva_ostacoli),
+          Ostacolo((2.8,1.0), 0.2, k_repulsiva_ostacoli),
+          Ostacolo((0.47,1.0), 0.2, k_repulsiva_ostacoli)]
 START=(0.105,0.105)
 TARGET=(2.8, 1.8)
 robot = rb.Robot(1.0, 5.0, whelebase)
@@ -185,7 +212,7 @@ pos_array = [ ]
 theta = [ ]
 vl_array = [ ]
 vr_array = [ ]
-while t < 20:
+while t < 200:
     (vl, vr) = p.evaluate(TARGET[0],TARGET[1])
 
     robot.evaluate(vl, vr, rb.delta_t)
@@ -194,12 +221,22 @@ while t < 20:
     pos_array.append((robot.x, robot.y))
     vl_array.append(robot.current_vl)
     vr_array.append(robot.current_vr)
-
+    
+    if abs(TARGET[0]-robot.x)<0.01 and abs(TARGET[1]-robot.y)<0.01:
+        print(f"{t} sono arrivato: target{TARGET}, pos {robot.x},{robot.y}")
+        break;
+    
     t = t + rb.delta_t
+
+#format dato robot x e y, rep ostacoli uno per uno, rep dai bordi totali, f attrattiva, v e w, vl e vr
+j=0
+for dato in dati:
+    print(f"dati di {j}= {dato}")
+    j+=1
 
 #plotting
 ax=plt.gcf().gca()
-plt.axis([-0.2, 3.2, -0.2, 2.2])
+plt.axis([-0.1, base+0.1, -0.1, altezza+0.1])
 for (x,y) in pos_array:
     cicle=plt.Circle((x,y), robot_radius, color='r')
     plt.gcf().gca().add_artist(cicle) 
@@ -214,3 +251,4 @@ rect1 = matplotlib.patches.Rectangle((0,0), 3, 2, color="c")
 ax.add_patch(rect1)
 
 plt.show()
+
