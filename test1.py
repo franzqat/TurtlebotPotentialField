@@ -63,18 +63,18 @@ def forza_repulsiva_ostacolo(ostacolo, posizione, soglia):
         #print(f"distanza {d}, frep {f_rep}  ")
         angolo=math.atan2(d_y, d_x)
     
-        if angolo > abs(math.pi/2):
-            f_rep_x=-f_rep*math.cos(angolo)
-        else:
-            f_rep_x=f_rep*math.cos(angolo)
+#        if angolo > abs(math.pi/2):
+#            f_rep_x=-f_rep*math.cos(angolo)
+#        else:
+#            f_rep_x=f_rep*math.cos(angolo)
+#            
+#        if angolo > 0:
+#            f_rep_y=-f_rep*math.sin(angolo)
+#        else:
+#            f_rep_y=f_rep*math.sin(angolo)
             
-        if angolo > 0:
-            f_rep_y=-f_rep*math.sin(angolo)
-        else:
-            f_rep_y=f_rep*math.sin(angolo)
-            
-        #f_rep_x=f_rep*math.cos(angolo)
-        #f_rep_y=f_rep*math.sin(angolo)
+        f_rep_x=-f_rep*math.cos(angolo)
+        f_rep_y=-f_rep*math.sin(angolo)
         #print(f"angolo {angolo} repx {f_rep_x}, repy {f_rep_y}, t {t} ,d {d}")
     else:
         f_rep_x=0
@@ -195,16 +195,18 @@ class PotentialFieldControl:
 
 
 
-ostacoli=[Ostacolo((1.5,1.0), 0.2, k_repulsiva_ostacoli),
-          Ostacolo((2.1,1.8), 0.2, k_repulsiva_ostacoli),
-          Ostacolo((2.8,1.0), 0.2, k_repulsiva_ostacoli),
-          Ostacolo((0.47,1.0), 0.2, k_repulsiva_ostacoli)]
-START=(0.105,0.105)
-TARGET=(2.8, 1.8)
+ostacoli=[
+#          Ostacolo((2.1,1.8), 0.2, k_repulsiva_ostacoli),
+#          Ostacolo((2.8,1), 0.2, k_repulsiva_ostacoli),
+          
+
+          Ostacolo((1.3,1), 0.2, k_repulsiva_ostacoli)]
+START=(0.105,1)
+TARGET=(2.5, 1)
 robot = rb.Robot(1.0, 5.0, whelebase)
 robot.setPose(START[0], START[1], 0)
 
-p = PotentialFieldControl(robot,1, 0.22,5, 2.84, soglia=0.2, ostacoli=ostacoli, k_att=1)
+p = PotentialFieldControl(robot,1, 0.22,5, 2.84, soglia=0.26, ostacoli=ostacoli, k_att=1)
 
 t = 0
 time_array = [ ]
