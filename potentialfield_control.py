@@ -10,7 +10,7 @@ import math
 #Parametri robot
 vel_max=0.22 #m/s
 rot_max=2.84 #rad/s
-whelebase=0.160 #m
+wheelebase=0.160 #m
 robot_radius=0.105 #m
 #Parametri terreno
 base=3
@@ -100,7 +100,7 @@ class PotentialFieldController(threading.Thread):
         self.turtle = turtle_if
         self.setDaemon(True)
         p = self.turtle.getPose()
-        self.target_pos = p.linear
+        self.target_pos = (p.x, p.y)
         self.mutex = threading.Lock()
         self.delta_t = delta_t
         self.base=base
@@ -109,7 +109,6 @@ class PotentialFieldController(threading.Thread):
         self.sat_lin = sat_lin
         self.kp_ang = kp_ang
         self.sat_ang = sat_ang
-        self.robot = robot
         self.soglia=soglia
         self.ostacoli=ostacoli
         self.k_att=k_att
@@ -133,20 +132,19 @@ class PotentialFieldController(threading.Thread):
 
             self.mutex.acquire()
             p = self.turtle.getPose()
-            current_pos = p.linear
             
             f_tot_x=0
             f_tot_y=0
             
             for ostacolo in self.ostacoli:            
-            f_rep_x, f_rep_y=forza_repulsiva_ostacolo(ostacolo=ostacolo, 
-                                             posizione=(self.robot.x, self.robot.y),
-                                             soglia=self.soglia)
-            f_tot_x+=f_rep_x
-            f_tot_y+=f_rep_y
+                f_rep_x, f_rep_y=forza_repulsiva_ostacolo(ostacolo=ostacolo, 
+                                                         posizione=(p.x, p.y),
+                                                         soglia=self.soglia)
+                f_tot_x+=f_rep_x
+                f_tot_y+=f_rep_y
             
             
-            f_rep_x, f_rep_y = forza_repulsiva_bordo_x(posizione=(self.robot.x, self.robot.y),
+            f_rep_x, f_rep_y = forza_repulsiva_bordo_x(posizione=(p.x, p.y),
                                                    base=self.base,
                                                    altezza=self.altezza,
                                                    k_rep_b=k_rep_bordi,
@@ -158,15 +156,15 @@ class PotentialFieldController(threading.Thread):
             f_tot_y+=f_rep_y
             
             f_att_x, f_att_y=forza_attrattiva(k_att=self.k_att, 
-                                          posizione=(self.robot.x, self.robot.y), 
-                                          target=(target_x, target_y))
+                                              posizione=(p.x, p.y), 
+                                              target=(self.target_pos[0], self.target_pos[1]))
             f_tot_x+=f_att_x
             f_tot_y+=f_att_y
             
             f_tot=math.hypot(f_tot_x, f_tot_y)
         
             ang=math.atan2(f_tot_y, f_tot_x)        
-            heading_error = ang - robot.theta
+            heading_error = ang - p.theta
             
             
             #controllo PSat
@@ -183,8 +181,8 @@ class PotentialFieldController(threading.Thread):
             elif w < -self.sat_angular:
                 w = - self.sat_angular
     
-            vl = v - (w * self.robot.wheelbase / 2)
-            vr = v + (w * self.robot.wheelbase / 2)
+            vl = v - (w * wheelebase / 2)
+            vr = v + (w * wheelebase / 2)
         
         
 
