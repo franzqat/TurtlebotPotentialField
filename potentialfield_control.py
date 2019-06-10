@@ -112,7 +112,10 @@ class PotentialFieldController(threading.Thread):
         self.soglia=soglia
         self.ostacoli=ostacoli
         self.k_att=k_att
-
+	
+	def updateOstacoli(self, ostacoli_new):
+		self.ostacoli=ostacoli_new
+	
     def setTarget(self, tp):
         self.mutex.acquire()
         self.target_pos = tp

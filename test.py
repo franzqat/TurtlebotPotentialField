@@ -68,6 +68,9 @@ if __name__ == "__main__":
 			
 		elif commands[0] == "addo":
             ostacoli.append(Ostacolo((commands[1], commands[2]), commands[3], 0.5))
+			d.stop()
+			d.updateOstacoli(ostacoli)
+			d.start()			
          
 		elif commands[0] == "printo":
             print(ostacoli)
