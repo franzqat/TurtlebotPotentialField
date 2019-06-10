@@ -5,6 +5,8 @@ import sys
 from turtlebb import *
 from potentialfield_control import *
 
+ostacoli=[]
+
 if __name__ == "__main__":
 
     t = Turtlebot()
@@ -32,11 +34,14 @@ if __name__ == "__main__":
         
         if commands[0] == "help":
             print ("Commands:")
-            print ("quit          exit the program")
-            print ("pose          return the pose of the robot")
-            print ("pset x y th   set the pose of the robot")
-            print ("speed l r     set the speed of left and right wheels")
-            print ("stop          stop the robot")
+            print ("quit          	exit the program")
+            print ("pose          	return the pose of the robot")
+            print ("pset x y th   	set the pose of the robot")
+            print ("speed l r     	set the speed of left and right wheels")
+			print ("addo xc yc rg 	add obstacle")
+			print ("printo			print ostacoli")
+			print ("removeo id		remove ostacolo id")
+            print ("stop            stop the robot")
             
         elif commands[0] == "pose":
             print (t.getPose())
@@ -60,7 +65,16 @@ if __name__ == "__main__":
             
         elif commands[0] == "go":
             d.setTarget(int(commands[1]))
-            
+			
+		elif commands[0] == "addo":
+            ostacoli.append(Ostacolo((commands[1], commands[2]), commands[3], 0.5))
+         
+		elif commands[0] == "printo":
+            print(ostacoli)
+		
+		elif commands[0] == "removeo":
+            ostacoli.pop(commands[1])
+			
         else:
             print ("Invalid command")
 
