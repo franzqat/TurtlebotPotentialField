@@ -8,13 +8,13 @@ import math
 
 
 #Parametri robot
-vel_max=0.22 #m/s
+vel_max=1000 #mm/s
 rot_max=2.84 #rad/s
-wheelebase=0.160 #m
-robot_radius=0.105 #m
+wheelebase=160 #mm
+robot_radius=105 #mm
 #Parametri terreno
-base=3
-altezza=2
+base=1500 #mm
+altezza=3000 #mm
 k_rep_bordi=0.5
 k_repulsiva_ostacoli = 0.5
 
@@ -46,7 +46,7 @@ def forza_repulsiva_ostacolo(ostacolo, posizione, soglia):
     d_x = ostacolo.centro[0] - posizione[0] 
     d_y = ostacolo.centro[1] - posizione[1] 
     
-    #la distanza minima è la distanza della circonferenza, cioè distanza_dal_centro-raggio-raggio_robot
+    #la distanza minima e' la distanza della circonferenza, cioe' distanza_dal_centro-raggio-raggio_robot
     d=math.hypot(d_x, d_y)-ostacolo.raggio - robot_radius
 
     if d<soglia:      
@@ -69,28 +69,30 @@ def forza_repulsiva_bordo_x(posizione, base, altezza, k_rep_b, soglia):
     k_rep=k_rep_b
     #distanza lato inferiore
     d0=posizione[1]
-    if d0<soglia:
-        f_rep=k_rep*((1/d0**3)-(1/((d0**2)*soglia)))
-        f_rep_y=+f_rep
-    
-    #distanza lato superiore
-    d0=altezza-posizione[1]
-    if d0<soglia:
-        f_rep=k_rep*((1/d0**3)-(1/((d0**2)*soglia)))
-        f_rep_y=-f_rep
+    try:
+        if d0<soglia:
+            f_rep=k_rep*((1/d0**3)-(1/((d0**2)*soglia)))
+            f_rep_y=+f_rep
         
-    #distanza lato sinistro
-    d0=posizione[0]
-    if d0<soglia:
-        f_rep=k_rep*((1/d0**3)-(1/((d0**2)*soglia)))
-        f_rep_x=+f_rep
-    
-    #distanza lato destro
-    d0=base-posizione[0]
-    if d0<soglia:
-        f_rep=k_rep*((1/d0**3)-(1/((d0**2)*soglia)))
-        f_rep_x=-f_rep
+        #distanza lato superiore
+        d0=altezza-posizione[1]
+        if d0<soglia:
+            f_rep=k_rep*((1/d0**3)-(1/((d0**2)*soglia)))
+            f_rep_y=-f_rep
+            
+        #distanza lato sinistro
+        d0=posizione[0]
+        if d0<soglia:
+            f_rep=k_rep*((1/d0**3)-(1/((d0**2)*soglia)))
+            f_rep_x=+f_rep
         
+        #distanza lato destro
+        d0=base-posizione[0]
+        if d0<soglia:
+            f_rep=k_rep*((1/d0**3)-(1/((d0**2)*soglia)))
+            f_rep_x=-f_rep
+    except ZeroDivisionError:
+        return 0,0
     return f_rep_x, f_rep_y
 
 class PotentialFieldController(threading.Thread):
@@ -100,7 +102,9 @@ class PotentialFieldController(threading.Thread):
         self.turtle = turtle_if
         self.setDaemon(True)
         p = self.turtle.getPose()
+        print("p ",p)
         self.target_pos = (p.x, p.y)
+        print("target pos", self.target_pos)
         self.mutex = threading.Lock()
         self.delta_t = delta_t
         self.base=base
@@ -112,13 +116,14 @@ class PotentialFieldController(threading.Thread):
         self.soglia=soglia
         self.ostacoli=ostacoli
         self.k_att=k_att
+        self.cnt = 0
 	
 	def updateOstacoli(self, ostacoli_new):
 		self.ostacoli=ostacoli_new
 	
-    def setTarget(self, tp):
+    def setTarget(self, tx, ty):
         self.mutex.acquire()
-        self.target_pos = tp
+        self.target_pos = (tx, ty)
         self.turtle.clearDistances()
         self.mutex.release()
 
@@ -135,7 +140,7 @@ class PotentialFieldController(threading.Thread):
 
             self.mutex.acquire()
             p = self.turtle.getPose()
-            
+
             f_tot_x=0
             f_tot_y=0
             
@@ -172,23 +177,32 @@ class PotentialFieldController(threading.Thread):
             
             #controllo PSat
             v = self.kp_lin * f_tot
-            w = self.kp_angular * heading_error
+            w = self.kp_ang * heading_error
     
             if v > self.sat_lin:
                 v = self.sat_lin
             elif v < -self.sat_lin:
                 v = - self.sat_lin
     
-            if w > self.sat_angular:
-                w = self.sat_angular
-            elif w < -self.sat_angular:
-                w = - self.sat_angular
+            if w > self.sat_ang:
+                w = self.sat_ang
+            elif w < -self.sat_ang:
+                w = - self.sat_ang
     
             vl = v - (w * wheelebase / 2)
             vr = v + (w * wheelebase / 2)
-        
-        
+            
+            if self.cnt %150 == 0:
+                print("f_tot",f_tot,"vl vr", (vl,vr), "v",v)
+                print(self.target_pos)
+            
+            if (abs(self.target_pos[0] - p.x) < 50) and (abs(self.target_pos[1] - p.y) < 50):
+                vl = 0
+                vr = 0
+                if self.cnt %150 == 0:
+                    print('freno!',self.target_pos )
 
+            self.cnt+=1
             self.mutex.release()
             self.turtle.setSpeeds(vl, vr)
 
