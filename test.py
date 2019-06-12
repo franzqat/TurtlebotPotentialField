@@ -13,14 +13,14 @@ if __name__ == "__main__":
     t.open()
     t.setPose(105,105,0)
     d = PotentialFieldController(t, #bot
-                              1500, ##base
-                              3000,  #altezza
+                              1.5, ##base
+                              3,  #altezza
                               0.01, #deltat
                               1,# kp_lin
-                              220, #sat_lineare
+                              0.22, #sat_lineare
                               5,#kp ang
                               2.84,#sat angolare                        
-                              soglia=260,#soglia
+                              soglia=0.26,#soglia
                               ostacoli=ostacoli, #ostacoli
                               k_att=1)#katt
     
@@ -65,8 +65,10 @@ if __name__ == "__main__":
             print("ok")
 
         elif commands[0] == "go":
-            d.setTarget(int(commands[1]), int(commands[2]))
-
+            setx=(int(commands[1]))
+            sety=(int(commands[2]))
+            d.setTarget(float(setx)/1000, float(sety)/1000)
+###TODOTODOTODO check se gira qui ###
         elif commands[0] == "addo":
             ostacoli.append(Ostacolo((commands[1], commands[2]), commands[3], 0.5))
             d.stop()
