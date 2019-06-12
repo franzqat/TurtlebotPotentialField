@@ -8,13 +8,13 @@ import math
 
 
 #Parametri robot
-vel_max=1000 #mm/s
+vel_max=0.22 #m/s
 rot_max=2.84 #rad/s
-wheelebase=160 #mm
-robot_radius=105 #mm
+wheelebase=0.160 #m
+robot_radius=0.105 #m
 #Parametri terreno
-base=1500 #mm
-altezza=3000 #mm
+base=1.5 #m
+altezza=3 #m
 k_rep_bordi=0.5
 k_repulsiva_ostacoli = 0.5
 
@@ -49,7 +49,7 @@ def forza_repulsiva_ostacolo(ostacolo, posizione, soglia):
     #la distanza minima e' la distanza della circonferenza, cioe' distanza_dal_centro-raggio-raggio_robot
     d=math.hypot(d_x, d_y)-ostacolo.raggio - robot_radius
 
-    if d<soglia:      
+    if d<soglia and d!=0:
         f_rep=ostacolo.k_rep*((1/d**3)-(1/((d**2)*soglia)))
         angolo=math.atan2(d_y, d_x)
 
@@ -69,30 +69,28 @@ def forza_repulsiva_bordo_x(posizione, base, altezza, k_rep_b, soglia):
     k_rep=k_rep_b
     #distanza lato inferiore
     d0=posizione[1]
-    try:
-        if d0<soglia:
-            f_rep=k_rep*((1/d0**3)-(1/((d0**2)*soglia)))
-            f_rep_y=+f_rep
+    if d0<soglia and d0!=0:
+        f_rep=k_rep*((1/d0**3)-(1/((d0**2)*soglia)))
+        f_rep_y=+f_rep
+    
+    #distanza lato superiore
+    d0=altezza-posizione[1]
+    if d0<soglia and d0!=0:
+        f_rep=k_rep*((1/d0**3)-(1/((d0**2)*soglia)))
+        f_rep_y=-f_rep
         
-        #distanza lato superiore
-        d0=altezza-posizione[1]
-        if d0<soglia:
-            f_rep=k_rep*((1/d0**3)-(1/((d0**2)*soglia)))
-            f_rep_y=-f_rep
-            
-        #distanza lato sinistro
-        d0=posizione[0]
-        if d0<soglia:
-            f_rep=k_rep*((1/d0**3)-(1/((d0**2)*soglia)))
-            f_rep_x=+f_rep
+    #distanza lato sinistro
+    d0=posizione[0]
+    if d0<soglia and d0!=0:
+        f_rep=k_rep*((1/d0**3)-(1/((d0**2)*soglia)))
+        f_rep_x=+f_rep
+    
+    #distanza lato destro
+    d0=base-posizione[0]
+    if d0<soglia and d0!=0:
+        f_rep=k_rep*((1/d0**3)-(1/((d0**2)*soglia)))
+        f_rep_x=-f_rep
         
-        #distanza lato destro
-        d0=base-posizione[0]
-        if d0<soglia:
-            f_rep=k_rep*((1/d0**3)-(1/((d0**2)*soglia)))
-            f_rep_x=-f_rep
-    except ZeroDivisionError:
-        return 0,0
     return f_rep_x, f_rep_y
 
 class PotentialFieldController(threading.Thread):
@@ -103,7 +101,7 @@ class PotentialFieldController(threading.Thread):
         self.setDaemon(True)
         p = self.turtle.getPose()
         print("p ",p)
-        self.target_pos = (p.x, p.y)
+        self.target_pos = (float(p.x)/1000, float(p.y)/1000)
         print("target pos", self.target_pos)
         self.mutex = threading.Lock()
         self.delta_t = delta_t
@@ -117,9 +115,6 @@ class PotentialFieldController(threading.Thread):
         self.ostacoli=ostacoli
         self.k_att=k_att
         self.cnt = 0
-	
-	def updateOstacoli(self, ostacoli_new):
-		self.ostacoli=ostacoli_new
 	
     def setTarget(self, tx, ty):
         self.mutex.acquire()
@@ -146,13 +141,13 @@ class PotentialFieldController(threading.Thread):
             
             for ostacolo in self.ostacoli:            
                 f_rep_x, f_rep_y=forza_repulsiva_ostacolo(ostacolo=ostacolo, 
-                                                         posizione=(p.x, p.y),
+                                                         posizione=(float(p.x)/1000, float(p.y)/1000),
                                                          soglia=self.soglia)
                 f_tot_x+=f_rep_x
                 f_tot_y+=f_rep_y
             
             
-            f_rep_x, f_rep_y = forza_repulsiva_bordo_x(posizione=(p.x, p.y),
+            f_rep_x, f_rep_y = forza_repulsiva_bordo_x(posizione=(float(p.x)/1000, float(p.y)/1000),
                                                    base=self.base,
                                                    altezza=self.altezza,
                                                    k_rep_b=k_rep_bordi,
@@ -164,7 +159,7 @@ class PotentialFieldController(threading.Thread):
             f_tot_y+=f_rep_y
             
             f_att_x, f_att_y=forza_attrattiva(k_att=self.k_att, 
-                                              posizione=(p.x, p.y), 
+                                              posizione=(float(p.x)/1000, float(p.y)/1000), 
                                               target=(self.target_pos[0], self.target_pos[1]))
             f_tot_x+=f_att_x
             f_tot_y+=f_att_y
@@ -191,12 +186,21 @@ class PotentialFieldController(threading.Thread):
     
             vl = v - (w * wheelebase / 2)
             vr = v + (w * wheelebase / 2)
-            
+            if vl > self.sat_lin:
+                vl = self.sat_lin
+            elif vl < -self.sat_lin:
+                vl = - self.sat_lin
+            if vr > self.sat_lin:
+                vr = self.sat_lin
+            elif vr < -self.sat_lin:
+                vr = - self.sat_lin
+
             if self.cnt %150 == 0:
                 print("f_tot",f_tot,"vl vr", (vl,vr), "v",v)
                 print(self.target_pos)
             
-            if (abs(self.target_pos[0] - p.x) < 50) and (abs(self.target_pos[1] - p.y) < 50):
+###TRESHOLD blocca le ruote quando arriva al target anche se ancora sotto influsso degli ostacoli
+            if (abs(self.target_pos[0] - (float(p.x)/1000) < 0.05) and (abs(self.target_pos[1] - (float(p.y)/1000)) < 0.05):
                 vl = 0
                 vr = 0
                 if self.cnt %150 == 0:
@@ -204,7 +208,7 @@ class PotentialFieldController(threading.Thread):
 
             self.cnt+=1
             self.mutex.release()
-            self.turtle.setSpeeds(vl, vr)
+            self.turtle.setSpeeds(vl*1000, vr*1000)
 
 
 

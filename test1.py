@@ -16,6 +16,7 @@ base=3
 altezza=2
 k_rep_bordi=0.5
 k_repulsiva_ostacoli = 0.5
+k_att=1
 
 
 dati=[]
@@ -51,22 +52,11 @@ def forza_repulsiva_ostacolo(ostacolo, posizione, soglia):
     #la distanza minima è la distanza della circonferenza, cioè distanza_dal_centro-raggio-raggio_robot
     d=math.hypot(d_x, d_y)-ostacolo.raggio - robot_radius
 
-    if d<soglia:      
+    if d<soglia and d!=0:
         f_rep=ostacolo.k_rep*((1/d**3)-(1/((d**2)*soglia)))
-        #k_rep * ((1/d)-(1/soglia))*1/d**2
-        #print(f"distanza {d}, frep {f_rep}  ")
         angolo=math.atan2(d_y, d_x)
-    
-#        if angolo > abs(math.pi/2):
-#            f_rep_x=-f_rep*math.cos(angolo)
-#        else:
-#            f_rep_x=f_rep*math.cos(angolo)
-#            
-#        if angolo > 0:
-#            f_rep_y=-f_rep*math.sin(angolo)
-#        else:
-#            f_rep_y=f_rep*math.sin(angolo)
-            
+
+
         f_rep_x=-f_rep*math.cos(angolo)
         f_rep_y=-f_rep*math.sin(angolo)
         #print(f"angolo {angolo} repx {f_rep_x}, repy {f_rep_y}, t {t} ,d {d}")
@@ -83,25 +73,25 @@ def forza_repulsiva_bordo_x(posizione, base, altezza, k_rep_b, soglia):
     k_rep=k_rep_b
     #distanza lato inferiore
     d0=posizione[1]
-    if d0<soglia:
+    if d0<soglia and d0!=0:
         f_rep=k_rep*((1/d0**3)-(1/((d0**2)*soglia)))
         f_rep_y=+f_rep
     
     #distanza lato superiore
     d0=altezza-posizione[1]
-    if d0<soglia:
+    if d0<soglia and d0!=0:
         f_rep=k_rep*((1/d0**3)-(1/((d0**2)*soglia)))
         f_rep_y=-f_rep
         
     #distanza lato sinistro
     d0=posizione[0]
-    if d0<soglia:
+    if d0<soglia and d0!=0:
         f_rep=k_rep*((1/d0**3)-(1/((d0**2)*soglia)))
         f_rep_x=+f_rep
     
     #distanza lato destro
     d0=base-posizione[0]
-    if d0<soglia:
+    if d0<soglia and d0!=0:
         f_rep=k_rep*((1/d0**3)-(1/((d0**2)*soglia)))
         f_rep_x=-f_rep
         
@@ -181,6 +171,16 @@ class PotentialFieldControl:
         vl = v - (w * self.robot.wheelbase / 2)
         vr = v + (w * self.robot.wheelbase / 2)
         
+        if vl > self.sat_lin:
+            vl = self.sat_lin
+        elif vl < -self.sat_lin:
+            vl = - self.sat_lin
+        if vr > self.sat_lin:
+            vr = self.sat_lin
+        elif vr < -self.sat_lin:
+            vr = - self.sat_lin
+            
+        
         dati[self.i].append((v, w))
         dati[self.i].append((vl, vr))
         self.i+=1
@@ -192,15 +192,14 @@ class PotentialFieldControl:
 ostacoli=[
 #          Ostacolo((2.1,1.8), 0.2, k_repulsiva_ostacoli),
 #          Ostacolo((2.8,1), 0.2, k_repulsiva_ostacoli),
-          
-
+          Ostacolo((1,0.5), 0.2, k_repulsiva_ostacoli),
           Ostacolo((1.3,1), 0.2, k_repulsiva_ostacoli)]
 START=(0.105,1)
 TARGET=(2.5, 1)
 robot = rb.Robot(1.0, 5.0, whelebase)
 robot.setPose(START[0], START[1], 0)
 
-p = PotentialFieldControl(robot,1, 0.22,5, 2.84, soglia=0.26, ostacoli=ostacoli, k_att=1)
+p = PotentialFieldControl(robot,1, 0.22,5, 2.84, soglia=0.26, ostacoli=ostacoli, k_att=k_att)
 
 t = 0
 time_array = [ ]
