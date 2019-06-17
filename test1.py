@@ -12,8 +12,8 @@ rot_max=2.84 #rad/s
 whelebase=0.160 #m
 robot_radius=0.105 #m
 #Parametri terreno
-base=3
-altezza=2
+base=1.5
+altezza=3
 k_rep_bordi=0.5
 k_repulsiva_ostacoli = 0.5
 k_att=1
@@ -189,17 +189,19 @@ class PotentialFieldControl:
 
 
 
-ostacoli=[
-#          Ostacolo((2.1,1.8), 0.2, k_repulsiva_ostacoli),
-#          Ostacolo((2.8,1), 0.2, k_repulsiva_ostacoli),
-          Ostacolo((1,0.5), 0.2, k_repulsiva_ostacoli),
-          Ostacolo((1.3,1), 0.2, k_repulsiva_ostacoli)]
-START=(0.105,1)
-TARGET=(2.5, 1)
+
+ostacoli=[ #((0.8,0.5), 0.1, k_repulsiva_ostacoli),
+          #Ostacolo((1.2,1), 0.1, k_repulsiva_ostacoli),
+          Ostacolo((0.8,2), 0.1, k_repulsiva_ostacoli),
+          Ostacolo((0.2,1.5), 0.1, k_repulsiva_ostacoli)]
+
+
+START=(0.105,0.105)
+TARGET=(0.8,2.5 )
 robot = rb.Robot(1.0, 5.0, whelebase)
 robot.setPose(START[0], START[1], 0)
 
-p = PotentialFieldControl(robot,1, 0.22,5, 2.84, soglia=0.26, ostacoli=ostacoli, k_att=k_att)
+p = PotentialFieldControl(robot,1, 0.22,5, 2.84, soglia=0.20, ostacoli=ostacoli, k_att=k_att)
 
 t = 0
 time_array = [ ]
@@ -217,7 +219,7 @@ while t < 200:
     vl_array.append(robot.current_vl)
     vr_array.append(robot.current_vr)
     
-    if abs(TARGET[0]-robot.x)<0.01 and abs(TARGET[1]-robot.y)<0.01:
+    if abs(TARGET[0]-robot.x)<0.06 and abs(TARGET[1]-robot.y)<0.06:
         print(f"{t} sono arrivato: target{TARGET}, pos {robot.x},{robot.y}")
         break;
     
@@ -242,7 +244,7 @@ for ostacolo in ostacoli:
 ax.add_artist(plt.Circle(START, robot_radius,color='y'))
 ax.add_artist(plt.Circle(TARGET,0.1,color='g'))
 
-rect1 = matplotlib.patches.Rectangle((0,0), 3, 2, color="c") 
+rect1 = matplotlib.patches.Rectangle((0,0), base, altezza, color="c") 
 ax.add_patch(rect1)
 
 plt.show()
