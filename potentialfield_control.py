@@ -195,12 +195,12 @@ class PotentialFieldController(threading.Thread):
             elif vr < -self.sat_lin:
                 vr = - self.sat_lin
 
-            if self.cnt %150 == 0:
-                print("f_tot",f_tot,"vl vr", (vl,vr), "v",v)
-                print(self.target_pos)
+            #quiuiif self.cnt %150 == 0:
+                #print("f_tot",f_tot,"vl vr", (vl,vr), "v",v)
+                #print(self.target_pos)
             
 ###TRESHOLD blocca le ruote quando arriva al target anche se ancora sotto influsso degli ostacoli
-            if (abs(self.target_pos[0] - (float(p.x)/1000) < 0.05) and (abs(self.target_pos[1] - (float(p.y)/1000)) < 0.05):
+            if (abs(self.target_pos[0] - (float(p.x)/1000) < 0.05) and (abs(self.target_pos[1] - (float(p.y)/1000))) < 0.05):
                 vl = 0
                 vr = 0
                 if self.cnt %150 == 0:

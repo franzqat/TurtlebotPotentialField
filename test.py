@@ -5,7 +5,12 @@ import sys
 from turtlebb import *
 from potentialfield_control import *
 
-ostacoli=[]
+
+k_repulsiva_ostacoli = 0.5
+ostacoli=[ Ostacolo((0.8,0.5), 0.1, k_repulsiva_ostacoli),
+          Ostacolo((1.2,1), 0.1, k_repulsiva_ostacoli),
+          Ostacolo((0.8,2), 0.1, k_repulsiva_ostacoli),
+          Ostacolo((0.2,1.5), 0.1, k_repulsiva_ostacoli)]
 
 if __name__ == "__main__":
 
@@ -20,7 +25,7 @@ if __name__ == "__main__":
                               0.22, #sat_lineare
                               5,#kp ang
                               2.84,#sat angolare                        
-                              soglia=0.26,#soglia
+                              soglia=0.2,#soglia
                               ostacoli=ostacoli, #ostacoli
                               k_att=1)#katt
     

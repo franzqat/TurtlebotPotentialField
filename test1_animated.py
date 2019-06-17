@@ -13,8 +13,8 @@ rot_max=2.84 #rad/s
 whelebase=0.160 #m
 robot_radius=0.105 #m
 #Parametri terreno
-base=3
-altezza=2
+base=1.5
+altezza=3
 k_rep_bordi=0.5
 k_repulsiva_ostacoli = 0.5
 
@@ -52,7 +52,7 @@ def forza_repulsiva_ostacolo(ostacolo, posizione, soglia):
     #la distanza minima è la distanza della circonferenza, cioè distanza_dal_centro-raggio-raggio_robot
     d=math.hypot(d_x, d_y)-ostacolo.raggio - robot_radius
 
-    if d<soglia:      
+    if d<soglia and d!=0:      
         f_rep=ostacolo.k_rep*((1/d**3)-(1/((d**2)*soglia)))
         #k_rep * ((1/d)-(1/soglia))*1/d**2
         #print(f"distanza {d}, frep {f_rep}  ")
@@ -84,25 +84,25 @@ def forza_repulsiva_bordo_x(posizione, base, altezza, k_rep_b, soglia):
     k_rep=k_rep_b
     #distanza lato inferiore
     d0=posizione[1]
-    if d0<soglia:
+    if d0<soglia and d0!=0:
         f_rep=k_rep*((1/d0**3)-(1/((d0**2)*soglia)))
         f_rep_y=+f_rep
     
     #distanza lato superiore
     d0=altezza-posizione[1]
-    if d0<soglia:
+    if d0<soglia and d0!=0:
         f_rep=k_rep*((1/d0**3)-(1/((d0**2)*soglia)))
         f_rep_y=-f_rep
         
     #distanza lato sinistro
     d0=posizione[0]
-    if d0<soglia:
+    if d0<soglia and d0!=0:
         f_rep=k_rep*((1/d0**3)-(1/((d0**2)*soglia)))
         f_rep_x=+f_rep
     
     #distanza lato destro
     d0=base-posizione[0]
-    if d0<soglia:
+    if d0<soglia and d0!=0:
         f_rep=k_rep*((1/d0**3)-(1/((d0**2)*soglia)))
         f_rep_x=-f_rep
         
@@ -207,13 +207,12 @@ class PotentialFieldControl:
 
 
 ostacoli=[
-#          Ostacolo((2.1,1.8), 0.2, k_repulsiva_ostacoli),
-#          Ostacolo((2.8,1), 0.2, k_repulsiva_ostacoli),
-          
+          Ostacolo((1,2), 0.1, k_repulsiva_ostacoli),
+          Ostacolo((1,1), 0.1, k_repulsiva_ostacoli),
+          Ostacolo((0.2,1.5), 0.1, k_repulsiva_ostacoli)]
 
-          Ostacolo((1.3,1), 0.2, k_repulsiva_ostacoli)]
-START=(0.105,1)
-TARGET=(2.5, 1)
+START=(0.105,0.105)
+TARGET=(0.2, 2)
 robot = rb.Robot(1.0, 5.0, whelebase)
 robot.setPose(START[0], START[1], 0)
 
@@ -226,7 +225,7 @@ theta = [ ]
 vl_array = [ ]
 vr_array = [ ]
 cnt=0
-while t < 2000:
+while t < 200:
     (vl, vr) = p.evaluate(TARGET[0],TARGET[1])
 
     robot.evaluate(vl, vr, rb.delta_t)
@@ -236,7 +235,7 @@ while t < 2000:
     vl_array.append(robot.current_vl)
     vr_array.append(robot.current_vr)
     
-    if abs(TARGET[0]-robot.x)<0.01 and abs(TARGET[1]-robot.y)<0.01:
+    if abs(TARGET[0]-robot.x)<0.06 and abs(TARGET[1]-robot.y)<0.06:
         cnt+=1
         if cnt>20:
             print(f"{t} sono arrivato: target{TARGET}, pos {robot.x},{robot.y}")
@@ -275,7 +274,7 @@ for (x,y) in pos_array:
     ax.add_patch(circle) 
 
 
-rect1 = matplotlib.patches.Rectangle((0,0), 3, 2, color="c")
+rect1 = matplotlib.patches.Rectangle((0,0), base, altezza, color="c")
 rect1.set_zorder(1) 
 ax.add_patch(rect1)
 
