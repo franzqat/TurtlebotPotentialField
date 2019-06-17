@@ -6,8 +6,6 @@ Created on Thu Jun  6 12:49:27 2019
 """
 import math
 
-delta_t=0.01
-
 class PISat:
 
     def __init__(self, kp, ki, sat):
@@ -42,9 +40,9 @@ class Massa:
         self.p = 0
         self.v = 0
 
-    def evaluate(self, _input, dt):
+    def evaluate(self, _input, delta_t):
         self.p = self.p + delta_t * self.v
-        self.v = (1 - self.b * dt/self.M) * self.v + dt / self.M * _input
+        self.v = (1 - self.b * delta_t/self.M) * self.v + delta_t / self.M * _input
 
     def get_position(self):
         return self.p

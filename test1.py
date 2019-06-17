@@ -203,6 +203,8 @@ robot.setPose(START[0], START[1], 0)
 
 p = PotentialFieldControl(robot,1, 0.22,5, 2.84, soglia=0.20, ostacoli=ostacoli, k_att=k_att)
 
+
+delta_t=0.01
 t = 0
 time_array = [ ]
 pos_array = [ ]
@@ -212,7 +214,7 @@ vr_array = [ ]
 while t < 200:
     (vl, vr) = p.evaluate(TARGET[0],TARGET[1])
 
-    robot.evaluate(vl, vr, rb.delta_t)
+    robot.evaluate(vl, vr, delta_t)
 
     time_array.append(t)
     pos_array.append((robot.x, robot.y))
@@ -223,7 +225,7 @@ while t < 200:
         print(f"{t} sono arrivato: target{TARGET}, pos {robot.x},{robot.y}")
         break;
     
-    t = t + rb.delta_t
+    t = t + delta_t
 
 #format dato robot x e y, rep ostacoli uno per uno, rep dai bordi totali, f attrattiva, v e w, vl e vr
 j=0
