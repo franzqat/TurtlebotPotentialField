@@ -13,8 +13,8 @@ rot_max=2.84 #rad/s
 wheelebase=0.160 #m
 robot_radius=0.105 #m
 #Parametri terreno
-base=1.5 #m
-altezza=3 #m
+#base=1.5 #m
+#altezza=3 #m
 k_rep_bordi=0.5
 k_repulsiva_ostacoli = 0.5
 
