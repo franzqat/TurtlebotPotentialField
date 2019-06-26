@@ -13,16 +13,19 @@ Il simulatore lavora in metri.
 ### Simulatore
 + Simulatore.py
 
+![alt text](https://github.com/franzqat/TurtlebotPotentialField/blob/master/Figure_1.png "Demo non animata")
 
 ### Simulatore animato
 + Simulatore_animated.py
 Versione animata del precedente simulatore
 
 ### Applicazione pratica
+Sul turtlebot occorre caricare i files __test.py__ e __turtlebb.py__. e __potentialfield_control.py__
+
 test.py è l'applicazione da eseguire sul turtlebot per mettere in pratica l'algoritmo.
-+ L'applicazione lavora in millimetri.
-+ Per eseguirla, una volta trasferito lo script sul robot, occorre lanciarlo tramite interprete python2
-+ Una volta avviato basta scrivere "go 800 2500"
+* L'applicazione lavora in millimetri.
+* Per eseguirla, una volta trasferito lo script sul robot, occorre lanciarlo tramite interprete python2
+* Una volta avviato basta scrivere "go 800 2500"
 
 
 
@@ -30,3 +33,5 @@ test.py è l'applicazione da eseguire sul turtlebot per mettere in pratica l'alg
 Robot.py è la libreria usata per la simulazione del robot nel simulatore.
 
 turtlebb.py è il driver del robot usato nell'applicazione
+
+potentialfield_control.py è il controllore che implementa l'algoritmo di potential field.
